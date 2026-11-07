@@ -1,10 +1,10 @@
 """FastAPI Production REST Service for Insurance Premium Default Risk Profiling.
 
-Provides high-performance asynchronous endpoints for single and batch customer
+Provides high-performance asynchronous endpoints for single customer
 default scoring, risk tier assignment, and intervention routing.
 """
 
-from typing import List, Optional, Union
+from typing import Optional
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -111,21 +111,17 @@ def health():
     }
 
 
-@app.post("/predict", response_model=Union[PredictionResult, List[PredictionResult]], tags=["Inference"])
-def predict(payload: Union[PolicyholderInput, List[PolicyholderInput]]):
-    """Score single or batch customer records for default risk and operational intervention."""
+@app.post("/predict", response_model=PredictionResult, tags=["Inference"])
+def predict(payload: PolicyholderInput):
+    """Score a single customer record for default risk and operational intervention."""
     if pipeline is None:
         raise HTTPException(status_code=503, detail="Inference model is unavailable")
 
-    is_single = isinstance(payload, PolicyholderInput)
-    records = [payload.model_dump(by_alias=True)] if is_single else [p.model_dump(by_alias=True) for p in payload]
-
-    df_input = pd.DataFrame(records)
+    record = payload.model_dump(by_alias=True)
 
     try:
-        results_df = pipeline.predict(df_input)
-        records_out = results_df.to_dict(orient="records")
-        return records_out[0] if is_single else records_out
+        result = pipeline.predict_one(record)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
 
