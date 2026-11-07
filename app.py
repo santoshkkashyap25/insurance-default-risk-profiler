@@ -15,7 +15,7 @@ from src.inference import InferencePipeline
 st.set_page_config(
     page_title="Insurance Premium Default Risk Profiler",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Custom Design System & CSS Styling
@@ -146,28 +146,6 @@ st.markdown(
 if pipeline is None:
     st.error("Model artifact or metadata is missing. Please verify `models/champion_model.pkl`.")
     st.stop()
-
-# Sidebar Information & Operational Reference
-with st.sidebar:
-    st.title("Operational Control")
-    st.markdown("### Model Architecture")
-    st.info(
-        "**Champion Model:** Calibrated XGBoost\n\n"
-        "**Decision Threshold:** 0.768\n\n"
-        "**Calibration:** Isotonic Regression"
-    )
-
-    st.markdown("### Risk Tier Matrix")
-    st.markdown("""
-- **High Risk:** > 70% default risk  
-  *Action:* Senior Concierge Call ($50)
-- **Medium Risk:** 40% – 70% default risk  
-  *Action:* Direct Mail + Urgent SMS ($10)
-- **Low-Medium Risk:** 20% – 40% default risk  
-  *Action:* Automated Two-Touch SMS ($2)
-- **Low Risk:** ≤ 20% default risk  
-  *Action:* Standard Digital Billing ($0)
-    """)
 
 # Policyholder Assessment Form
 hdr_c1, hdr_c2 = st.columns([4, 1])
